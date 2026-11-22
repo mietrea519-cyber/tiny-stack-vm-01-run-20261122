@@ -1,11 +1,5 @@
-// Tiny stack VM for make.fun's tiny-stack-vm-01 ISA (ISA.md in the kit).
-// Runs every /input/<id>/program.bin + input.bin and writes
-// /output/<id>/stdout.bin and /output/<id>/exit.txt in one run.
-// Node 22, erasable TypeScript only, no dependencies.
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-
-// [opcode, immediate bytes, pops, pushes] for every valid opcode.
 const OPS: [number, number, number, number][] = [
   [0x00, 0, 0, 0], [0x01, 1, 0, 1], [0x02, 4, 0, 1], [0x03, 0, 1, 0],
   [0x04, 0, 1, 2], [0x05, 0, 2, 2], [0x06, 0, 2, 3], [0x07, 0, 3, 3],
@@ -26,7 +20,6 @@ for (const [op, im, po, pu] of OPS) {
   POPS[op] = po;
   PUSH[op] = pu;
 }
-
 function run(p: Uint8Array, inp: Uint8Array): { out: Uint8Array; code: number } {
   const n = p.length;
   const D = new Int32Array(256);
@@ -175,9 +168,6 @@ function run(p: Uint8Array, inp: Uint8Array): { out: Uint8Array; code: number } 
         break;
       }
       case 0x50: {
-        // PRINT: decimal ASCII of the top value, written straight into the
-        // output buffer (no allocation); the limit check comes first, so a
-        // trapping PRINT writes none of its bytes.
         const v = D[sp - 1];
         let u = v < 0 ? -v : v;
         let len = v < 0 ? 1 : 0;
@@ -209,7 +199,6 @@ function run(p: Uint8Array, inp: Uint8Array): { out: Uint8Array; code: number } 
     }
   }
 }
-
 const I = process.env.MAKEFUN_INPUT_DIR ?? '/input';
 const O = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 for (const id of readdirSync(I).sort()) {
